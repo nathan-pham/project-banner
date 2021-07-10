@@ -3,12 +3,12 @@ const path = require("path")
 const fs = require("fs")
 
 const DIMENSIONS = [1200, 600]
-const ALLOWED_STACK = fs.readdirSync(path.join(__dirname, "images"))
+const ALLOWED_STACK = fs.readdirSync(path.join(__dirname, "images")).map(v => v.replace(/\.png/gi, ''))
 registerFont(path.join(__dirname, "fonts/sf-pro.otf"), { family: "SF Pro" })
 registerFont(path.join(__dirname, "fonts/sf-pro-medium.otf"), { family: "SF Pro Medium" })
 
 module.exports = class Badge {
-    constructor(title="Untitled Project", stack=[], description="Created by Nathan Pham") {
+    constructor(title="Untitled Project", stack=["js"], description="Created by Nathan Pham") {
         this.canvas = createCanvas(...DIMENSIONS)
         this.ctx = this.canvas.getContext("2d")
 
@@ -17,7 +17,7 @@ module.exports = class Badge {
 
         this.stack = stack
             .filter(i => ALLOWED_STACK.includes(i))
-            .map(i => i.endsWith("png") ? i : `${i}.png`)
+            .map(i => `${i}.png`)
     }
 
     background(width, height) {
@@ -55,7 +55,10 @@ module.exports = class Badge {
         const ctx = this.ctx
 
         const image = await loadImage(path.join(__dirname, filename))
-        ctx.drawImage(image, x, y, 60, 60)
+        const ratio = Math.min(60 / image.width, 60 / image.height)
+        
+        ctx.drawImage(image, x, y, image.width * ratio, image.height * ratio)
+        return image.width * ratio
     }
 
     async update() {
@@ -71,11 +74,13 @@ module.exports = class Badge {
 
         await this.logo("images/nathan-pham.png", 200, 290)
 
+        let margin = 20
+        let prevX = 255 + margin
         for(let i = 0; i < this.stack.length; i++) {
             const logo = this.stack[i]
-            const x = 205 + ((i + 1) * 70)
 
-            this.logo(`images/${logo}`, x, 290)
+            let imageWidth = await this.logo(`images/${logo}`, prevX, 290)
+            prevX += imageWidth + margin
         }
     }
 
