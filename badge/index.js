@@ -3,16 +3,8 @@ const path = require("path")
 const fs = require("fs")
 
 const DIMENSIONS = [1200, 600]
-registerFont(path.join(__dirname, "sf-pro.otf"), { family: "SF Pro" })
-
-const h1 = (ctx, string, x, y, { fillStyle="#FFF", strokeStyle="#000" }={}) => {
-    ctx.fillStyle = fillStyle
-    ctx.strokeStyle = strokeStyle
-    ctx.lineWidth = 12
-    ctx.font = '72px "SF Pro"'
-    ctx.strokeText(string, x, y)
-    ctx.fillText(string, x, y)
-}
+registerFont(path.join(__dirname, "fonts/sf-pro.otf"), { family: "SF Pro" })
+registerFont(path.join(__dirname, "fonts/sf-pro-medium.otf"), { family: "SF Pro Medium" })
 
 module.exports = class Badge {
     constructor(title="Untitled Project", stack=[], description="Created by Nathan Pham") {
@@ -29,14 +21,32 @@ module.exports = class Badge {
     background(width, height) {
         const ctx = this.ctx
 
-        ctx.clearRect(0, 0, width, height)
-
         const gradient = ctx.createLinearGradient(0, 0, width, height)
         gradient.addColorStop(0, "#F4C700")
         gradient.addColorStop(1, "#AB57CA")
     
         ctx.fillStyle = gradient
+        ctx.clearRect(0, 0, width, height)
         ctx.fillRect(0, 0, width, height)
+    }
+
+    h1(string, x, y, { fillStyle="#FFF", strokeStyle="#000" }={} ) {
+        const ctx = this.ctx
+
+        ctx.fillStyle = fillStyle
+        ctx.strokeStyle = strokeStyle
+        ctx.lineWidth = 12
+        ctx.font = '72px "SF Pro"'
+        ctx.strokeText(string, x, y)
+        ctx.fillText(string, x, y)
+    }
+
+    p(string, x, y) {
+        const ctx = this.ctx
+
+        ctx.fillStyle = "#FFF"
+        ctx.font = '32px "SF Pro Medium"'
+        ctx.fillText(string, x, y)
     }
 
     update() {
@@ -45,13 +55,10 @@ module.exports = class Badge {
 
         this.background(width, height)
 
-        h1(ctx, this.title, 200, 210, { fillStyle: "#000", strokeStyle: "#000" })
-        h1(ctx, this.title, 200, 200)
+        this.h1(this.title, 200, 210, { fillStyle: "#000", strokeStyle: "#000" })
+        this.h1(this.title, 200, 200)
         
-        // // Fill with gradient
-// ctx.fillStyle = grd;
-// ctx.fillRect(10, 10, 150, 80);
-
+        this.p(this.description, 200, 285)
     }
 
     render(res) {
