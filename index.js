@@ -4,8 +4,10 @@ const Badge = require("./badge")
 const app = express()
 const port = 8080
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
     const badge = new Badge()
+    
+    await badge.update()
     badge.render(res)
 })
 

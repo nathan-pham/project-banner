@@ -1,8 +1,9 @@
-const { registerFont, createCanvas } = require("canvas")
+const { registerFont, createCanvas, loadImage } = require("canvas")
 const path = require("path")
 const fs = require("fs")
 
 const DIMENSIONS = [1200, 600]
+const ALLOWED_STACK = fs.readdirSync(path.join(__dirname, "images"))
 registerFont(path.join(__dirname, "fonts/sf-pro.otf"), { family: "SF Pro" })
 registerFont(path.join(__dirname, "fonts/sf-pro-medium.otf"), { family: "SF Pro Medium" })
 
@@ -12,10 +13,11 @@ module.exports = class Badge {
         this.ctx = this.canvas.getContext("2d")
 
         this.title = title
-        this.stack = stack
         this.description = description
 
-        this.update()
+        this.stack = stack
+            .filter(i => ALLOWED_STACK.includes(i))
+            .map(i => i.endsWith("png") ? i : `${i}.png`)
     }
 
     background(width, height) {
@@ -49,23 +51,36 @@ module.exports = class Badge {
         ctx.fillText(string, x, y)
     }
 
-    update() {
+    async logo(filename, x, y) {
+        const ctx = this.ctx
+
+        const image = await loadImage(path.join(__dirname, filename))
+        ctx.drawImage(image, x, y, 60, 60)
+    }
+
+    async update() {
         const ctx = this.ctx
         const [width, height] = DIMENSIONS
 
         this.background(width, height)
 
-        this.h1(this.title, 200, 210, { fillStyle: "#000", strokeStyle: "#000" })
+        this.h1(this.title, 200, 205, { fillStyle: "#000", strokeStyle: "#000" })
         this.h1(this.title, 200, 200)
         
-        this.p(this.description, 200, 285)
+        this.p(this.description, 200, 270)
+
+        await this.logo("images/nathan-pham.png", 200, 290)
+
+        for(let i = 0; i < this.stack.length; i++) {
+            const logo = this.stack[i]
+            const x = 205 + ((i + 1) * 70)
+
+            this.logo(`images/${logo}`, x, 290)
+        }
     }
 
     render(res) {
         res.setHeader("Content-Type", "image/png")
         this.canvas.pngStream().pipe(res)
     }
-
-    // res.setHeader('Content-Type', 'image/png');
-    // draw().pngStream().pipe(res)
 }
