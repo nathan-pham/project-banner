@@ -72,14 +72,14 @@ module.exports = class Badge {
         
         this.p(this.description, 200, 270)
 
-        await this.logo("images/nathan-pham.png", 200, 290)
+        await this.logo("images/nathan-pham.png", 200, 295)
 
         let margin = 20
         let prevX = 255 + margin
         for(let i = 0; i < this.stack.length; i++) {
             const logo = this.stack[i]
 
-            let imageWidth = await this.logo(`images/${logo}`, prevX, 290)
+            let imageWidth = await this.logo(`images/${logo}`, prevX, 295)
             prevX += imageWidth + margin
         }
     }
